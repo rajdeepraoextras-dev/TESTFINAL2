@@ -2,202 +2,314 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Simple Restaurant Billing</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RestroPOS – Production Billing</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    background: #f5f5f5;
+/* ===========================
+   GLOBAL / RESET
+=========================== */
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Inter,Arial;
+    background:#f2f2f2;
 }
-header {
-    background: #ff5722;
-    color: white;
-    padding: 15px;
-    text-align: center;
-    font-size: 22px;
-    font-weight: bold;
-}
-.container {
-    display: flex;
-    height: calc(100vh - 60px);
-}
-.menu, .bill {
-    padding: 10px;
-    overflow-y: auto;
-}
-.menu {
-    width: 60%;
-    background: white;
-}
-.bill {
-    width: 40%;
-    background: #fafafa;
-    border-left: 2px solid #ddd;
-}
-.category {
-    margin-bottom: 10px;
-}
-.category h3 {
-    margin: 10px 0;
-    color: #333;
-}
-.items {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-.item {
-    background: #4caf50;
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    width: 45%;
-    text-align: center;
-}
-.bill h2 {
-    margin-top: 0;
-}
-.bill-item {
-    display: flex;
-    justify-content: space-between;
-    margin: 5px 0;
-}
-.bill-item button {
-    padding: 2px 6px;
-}
-.total {
-    font-size: 20px;
-    font-weight: bold;
-    margin-top: 15px;
-}
-.actions button {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    font-size: 18px;
-    cursor: pointer;
-}
-.cash { background: #2196f3; color: white; }
-.upi { background: #9c27b0; color: white; }
-.print { background: #ff5722; color: white; }
+.hidden{display:none}
 
-@media(max-width: 768px) {
-    .container {
-        flex-direction: column;
-    }
-    .menu, .bill {
-        width: 100%;
-        height: 50%;
-    }
+/* ===========================
+   LOGIN
+=========================== */
+#login{
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#111;
+}
+.login-box{
+    background:#fff;
+    padding:30px;
+    width:320px;
+    border-radius:8px;
+}
+.login-box h2{
+    margin:0 0 15px;
+    text-align:center;
+}
+.login-box input{
+    width:100%;
+    padding:10px;
+    margin-bottom:10px;
+    font-size:16px;
+}
+.login-box button{
+    width:100%;
+    padding:12px;
+    background:#ff5722;
+    color:#fff;
+    border:none;
+    font-size:16px;
+    cursor:pointer;
+}
+
+/* ===========================
+   APP LAYOUT
+=========================== */
+#app{
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+}
+header{
+    background:#ff5722;
+    color:#fff;
+    padding:12px 15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+main{
+    flex:1;
+    display:flex;
+    overflow:hidden;
+}
+
+/* ===========================
+   SIDEBAR
+=========================== */
+nav{
+    width:200px;
+    background:#222;
+    color:#fff;
+}
+nav button{
+    width:100%;
+    background:none;
+    color:#fff;
+    padding:14px;
+    border:none;
+    text-align:left;
+    cursor:pointer;
+}
+nav button:hover{background:#333}
+
+/* ===========================
+   CONTENT
+=========================== */
+section{
+    flex:1;
+    padding:15px;
+    overflow:auto;
+}
+
+/* ===========================
+   BILLING
+=========================== */
+.menu{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+.item{
+    background:#4caf50;
+    color:#fff;
+    padding:10px;
+    border-radius:5px;
+    width:150px;
+    cursor:pointer;
+}
+.bill{
+    margin-top:15px;
+}
+.bill-row{
+    display:flex;
+    justify-content:space-between;
+    margin:5px 0;
+}
+.total{
+    font-size:20px;
+    font-weight:bold;
+}
+
+/* ===========================
+   TABLE
+=========================== */
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+th,td{
+    border:1px solid #ccc;
+    padding:8px;
+    text-align:left;
 }
 </style>
 </head>
 
 <body>
 
-<header>🍽 Simple Restaurant Billing</header>
+<!-- ================= LOGIN ================= -->
+<div id="login">
+  <div class="login-box">
+    <h2>RestroPOS Login</h2>
+    <input id="user" placeholder="Username">
+    <input id="pin" type="password" placeholder="PIN">
+    <button onclick="Auth.login()">LOGIN</button>
+  </div>
+</div>
 
-<div class="container">
+<!-- ================= APP ================= -->
+<div id="app" class="hidden">
 
-    <!-- MENU -->
-    <div class="menu">
-        <div class="category">
-            <h3>Rolls</h3>
-            <div class="items">
-                <div class="item" onclick="addItem('Chicken Roll',69)">Chicken Roll ₹69</div>
-                <div class="item" onclick="addItem('Paneer Roll',49)">Paneer Roll ₹49</div>
-            </div>
-        </div>
+<header>
+  <b>🍽 RestroPOS</b>
+  <span id="userLabel"></span>
+</header>
 
-        <div class="category">
-            <h3>Biryani</h3>
-            <div class="items">
-                <div class="item" onclick="addItem('Chicken Biryani',99)">Chicken Biryani ₹99</div>
-                <div class="item" onclick="addItem('Veg Biryani',79)">Veg Biryani ₹79</div>
-            </div>
-        </div>
+<main>
+<nav>
+  <button onclick="UI.show('dashboard')">Dashboard</button>
+  <button onclick="UI.show('billing')">Billing</button>
+  <button onclick="UI.show('orders')">Orders</button>
+  <button onclick="UI.show('reports')">Reports</button>
+  <button onclick="Auth.logout()">Logout</button>
+</nav>
 
-        <div class="category">
-            <h3>Drinks</h3>
-            <div class="items">
-                <div class="item" onclick="addItem('Cold Drink',20)">Cold Drink ₹20</div>
-                <div class="item" onclick="addItem('Water Bottle',15)">Water Bottle ₹15</div>
-            </div>
-        </div>
-    </div>
+<section id="dashboard">
+  <h2>Dashboard</h2>
+  <p>Total Orders: <b id="dOrders">0</b></p>
+  <p>Total Sales: ₹<b id="dSales">0</b></p>
+</section>
 
-    <!-- BILL -->
-    <div class="bill">
-        <h2>🧾 Bill</h2>
-        <div id="billItems"></div>
-        <div class="total">Total: ₹<span id="total">0</span></div>
+<section id="billing" class="hidden">
+  <h2>New Bill</h2>
+  <div class="menu" id="menu"></div>
+  <div class="bill" id="bill"></div>
+  <div class="total">Total ₹<span id="total">0</span></div>
+  <button onclick="Billing.pay('CASH')">Cash</button>
+  <button onclick="Billing.pay('UPI')">UPI</button>
+</section>
 
-        <div class="actions">
-            <button class="cash" onclick="pay('CASH')">💵 Cash</button>
-            <button class="upi" onclick="pay('UPI')">📱 UPI</button>
-            <button class="print" onclick="printBill()">🖨 Print Bill</button>
-        </div>
-    </div>
+<section id="orders" class="hidden">
+  <h2>Orders</h2>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Total</th><th>Mode</th></tr>
+    </thead>
+    <tbody id="orderTable"></tbody>
+  </table>
+</section>
 
+<section id="reports" class="hidden">
+  <h2>Reports</h2>
+  <p>Daily Sales: ₹<b id="rSales">0</b></p>
+</section>
+
+</main>
 </div>
 
 <script>
-let bill = {};
+/* ===========================
+   DATABASE (LOCAL STORAGE)
+=========================== */
+const DB={
+ users:[{u:'admin',p:'1234',role:'admin'}],
+ products:[
+  {name:'Chicken Roll',price:69},
+  {name:'Paneer Roll',price:49},
+  {name:'Chicken Biryani',price:99},
+ ],
+ orders:JSON.parse(localStorage.getItem('orders')||'[]'),
+ save(){localStorage.setItem('orders',JSON.stringify(this.orders))}
+};
 
-function addItem(name, price) {
-    if (!bill[name]) {
-        bill[name] = { price, qty: 1 };
-    } else {
-        bill[name].qty++;
-    }
-    renderBill();
-}
+/* ===========================
+   AUTH
+=========================== */
+const Auth={
+ login(){
+  const u=user.value,p=pin.value;
+  const found=DB.users.find(x=>x.u===u&&x.p===p);
+  if(!found) return alert('Invalid');
+  login.classList.add('hidden');
+  app.classList.remove('hidden');
+  userLabel.innerText=u;
+  UI.refresh();
+ },
+ logout(){location.reload()}
+};
 
-function changeQty(name, delta) {
-    bill[name].qty += delta;
-    if (bill[name].qty <= 0) delete bill[name];
-    renderBill();
-}
+/* ===========================
+   UI
+=========================== */
+const UI={
+ show(id){
+  document.querySelectorAll('section').forEach(s=>s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+ },
+ refresh(){
+  dOrders.innerText=DB.orders.length;
+  dSales.innerText=DB.orders.reduce((a,b)=>a+b.total,0);
+  rSales.innerText=dSales.innerText;
+  Orders.render();
+  Billing.renderMenu();
+ }
+};
 
-function renderBill() {
-    let html = '';
-    let total = 0;
+/* ===========================
+   BILLING ENGINE
+=========================== */
+const Billing={
+ cart:{},
+ renderMenu(){
+  menu.innerHTML='';
+  DB.products.forEach(p=>{
+    const d=document.createElement('div');
+    d.className='item';
+    d.innerText=`${p.name} ₹${p.price}`;
+    d.onclick=()=>Billing.add(p);
+    menu.appendChild(d);
+  });
+ },
+ add(p){
+  this.cart[p.name]=(this.cart[p.name]||0)+1;
+  this.render();
+ },
+ render(){
+  bill.innerHTML='';
+  let t=0;
+  for(let k in this.cart){
+    const qty=this.cart[k];
+    const price=DB.products.find(x=>x.name===k).price;
+    t+=price*qty;
+    bill.innerHTML+=`<div class="bill-row">${k} x ${qty}</div>`;
+  }
+  total.innerText=t;
+ },
+ pay(mode){
+  if(!total.innerText) return;
+  DB.orders.push({id:Date.now(),total:+total.innerText,mode});
+  DB.save();
+  this.cart={};
+  this.render();
+  UI.refresh();
+ }
+};
 
-    for (let item in bill) {
-        let { price, qty } = bill[item];
-        total += price * qty;
-        html += `
-            <div class="bill-item">
-                ${item} x ${qty}
-                <div>
-                    <button onclick="changeQty('${item}',-1)">-</button>
-                    <button onclick="changeQty('${item}',1)">+</button>
-                </div>
-            </div>
-        `;
-    }
-
-    document.getElementById('billItems').innerHTML = html;
-    document.getElementById('total').innerText = total;
-}
-
-function pay(mode) {
-    if (Object.keys(bill).length === 0) {
-        alert("No items added");
-        return;
-    }
-    alert("Payment Successful via " + mode);
-    bill = {};
-    renderBill();
-}
-
-function printBill() {
-    window.print();
-}
+/* ===========================
+   ORDERS
+=========================== */
+const Orders={
+ render(){
+  orderTable.innerHTML='';
+  DB.orders.forEach(o=>{
+    orderTable.innerHTML+=`<tr><td>${o.id}</td><td>${o.total}</td><td>${o.mode}</td></tr>`;
+  });
+ }
+};
 </script>
 
 </body>
 </html>
+
